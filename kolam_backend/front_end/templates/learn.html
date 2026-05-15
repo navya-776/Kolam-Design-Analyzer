@@ -628,12 +628,12 @@
         import { getFirestore, collection, addDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBvp2E8q221qU6qgTKBVD-ak68OOQ1yyTs",
-            authDomain: "kolam-b82f4.firebaseapp.com",
-            projectId: "kolam-b82f4",
-            storageBucket: "kolam-b82f4.appspot.com",
-            messagingSenderId: "869946246676",
-            appId: "1:869946246676:web:de9f147841a94526a3c901"
+            apiKey: "{{ FIREBASE_API_KEY }}",
+            authDomain: "{{ FIREBASE_AUTH_DOMAIN }}",
+            projectId: "{{ FIREBASE_PROJECT_ID }}",
+            storageBucket: "{{ FIREBASE_STORAGE_BUCKET }}",
+            messagingSenderId: "{{ FIREBASE_MESSAGING_SENDER_ID }}",
+            appId: "{{ FIREBASE_APP_ID }}"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -736,7 +736,7 @@
             formData.append("upload_preset", "kolam_uploads");
             formData.append("public_id", fileName); // ✅ Random name assigned
 
-            const cloudName = "dslctk17b";
+            const cloudName = "{{ CLOUDINARY_CLOUD_NAME }}";
 
             const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                 method: "POST",

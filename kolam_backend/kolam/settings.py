@@ -15,9 +15,9 @@ load_dotenv()
 API_KEY = os.getenv("API_KEY")
 
 CLOUDINARY = {
-    'cloud_name': 'dslctk17b',
-    'api_key': '219163839693874',
-    'api_secret': 'JCxyUsbuQwkFkSlHtAZyQkP2fOA'
+    'cloud_name': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'api_key': os.getenv('CLOUDINARY_API_KEY'),
+    'api_secret': os.getenv('CLOUDINARY_API_SECRET')
 }
 
 cloudinary.config(**CLOUDINARY)
@@ -41,7 +41,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --------------------------
 # Quick-start development settings
 # --------------------------
-SECRET_KEY = 'django-insecure-0%j0#^@2kyg3bn8(56sdtluwsj4$81@z0qavn^l8a#63ul3qz3'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-fallback-key')
 DEBUG = True
 ALLOWED_HOSTS = []
 
@@ -98,6 +98,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'kolam.context_processors.firebase_config',
             ],
         },
     },
