@@ -1,0 +1,901 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kolam Learning Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(238, 90, 36, 0.2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .right-panel {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #ee5a24;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .lesson-levels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .level {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .level:hover {
+            background-color: #ffe5e5;
+            border-color: #ff6b6b;
+        }
+
+        .level.active {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .video-error {
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            color: #666;
+        }
+
+        /* Remove unused CSS for lessons and progress */
+
+        .canvas-container {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .canvas-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 5px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: #333;
+        }
+
+        #brushSize {
+            width: 100px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(238, 90, 36, 0.2);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #ee5a24, #d63031);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(238, 90, 36, 0.3);
+        }
+
+        #kolamCanvas {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+            cursor: crosshair;
+            background-color: white;
+        }
+
+        .step-instruction {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f7ff;
+            border-radius: 8px;
+        }
+
+        .activity-log {
+            font-style: italic;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .lesson-levels {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .canvas-tools {
+                justify-content: center;
+            }
+
+            .lesson-item.completed {
+                background-color: #d4ffd4;
+                border-left: 6px solid #22c55e;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Learn with Kolam</h1>
+            <p class="tagline">Master the ancient art of Kolam from basics to professional level</p>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="card">
+                    <h2>📹 Current Lesson</h2>
+                    <h3 id="currentLessonTitle">▶ Introduction to Kolam Basics</h3>
+                    <p id="currentLessonDescription">Learn the fundamental concepts and tools needed for Kolam creation.
+                    </p>
+
+                    <div class="video-container">
+                        <video id="lessonVideo" controls preload="metadata"></video>
+                    </div>
+
+                    <div class="lesson-levels">
+                        <div class="level" data-level="basic">🌱 Basic</div>
+                        <div class="level" data-level="intermediate">🌿 Intermediate</div>
+                        <div class="level" data-level="advanced">🌳 Advanced</div>
+                        <div class="level" data-level="master">👑 Master</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📚 Lessons</h2>
+                    <ul class="lesson-list">
+                        <li class="lesson-item active" data-lesson-id="lesson1">
+                            <span>Understanding Kolam Basics</span>
+                            <span class="lesson-duration">5 min • 4 steps</span>
+                        </li>
+
+                        <li class="lesson-item" data-lesson-id="lesson2">
+                            <span>Creating Your First Dots</span>
+                            <span class="lesson-duration">8 min • 4 steps</span>
+                        </li>
+
+                        <li class="lesson-item" data-lesson-id="lesson3">
+                            <span>Simple Line Connections</span>
+                            <span class="lesson-duration">10 min • 4 steps</span>
+                        </li>
+
+                        <li class="lesson-item" data-lesson-id="lesson4">
+                            <span>Basic Square Patterns</span>
+                            <span class="lesson-duration">12 min • 4 steps</span>
+                        </li>
+                    </ul>
+
+                </div>
+
+                <div class="card">
+                    <h2>📈 Your Progress</h2>
+
+                    <p id="progress-text">Level: Beginner (0% Complete)</p>
+
+                    <div class="progress-container"
+                        style="width:100%; background:#eee; height:10px; border-radius:5px; margin-top:10px;">
+                        <div id="progress-bar"
+                            style="background: linear-gradient(90deg, #ff6b6b, #ee5a24); width:0%; height:100%; border-radius:5px;">
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+
+            </div>
+
+            <div class="right-panel">
+                <div class="canvas-container">
+                    <h2>🎨 Kolam Drawing Canvas</h2>
+
+                    <div class="canvas-tools">
+                        <div class="tool-group">
+                            <label>🎨 Colors:</label>
+                            <div class="color-palette">
+                                <div class="color-option active" style="background-color: #000000" data-color="#000000">
+                                </div>
+                                <div class="color-option" style="background-color: #ff0000" data-color="#ff0000"></div>
+                                <div class="color-option" style="background-color: #00ff00" data-color="#00ff00"></div>
+                                <div class="color-option" style="background-color: #0000ff" data-color="#0000ff"></div>
+                                <div class="color-option" style="background-color: #ffff00" data-color="#ffff00"></div>
+                                <div class="color-option" style="background-color: #ff00ff" data-color="#ff00ff"></div>
+                                <div class="color-option" style="background-color: #00ffff" data-color="#00ffff"></div>
+                            </div>
+                            <input type="color" id="colorPicker" value="#000000">
+                        </div>
+
+                        <div class="tool-group">
+                            <label>🖌 Brush Size:</label>
+                            <input type="range" id="brushSize" min="1" max="20" value="3">
+                            <span id="brushSizeValue">3px</span>
+                        </div>
+
+                        <div class="tool-group">
+                            <label>📐 Grid:</label>
+                            <button id="toggleGrid">Show Guide</button>
+                        </div>
+
+                        <div class="tool-group">
+                            <button id="clearCanvas">🗑 Clear</button>
+                            <button id="saveDesign">💾 Save Design</button>
+                        </div>
+                    </div>
+
+                    <canvas id="kolamCanvas" width="600" height="400"></canvas>
+
+                    <div class="step-instruction">
+                        <h3>📋 Current Step</h3>
+                        <p>Welcome! Try drawing on the canvas below. Use the tools to change colors and brush size.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Video configuration
+        const videoConfig = {
+            basic: {
+                src: "{% static 'videos/basic.mp4' %}",
+                title: "Introduction to Kolam Basics",
+                description: "Learn the fundamental concepts and tools needed for Kolam creation.",
+                duration: 22
+            },
+            intermediate: {
+                src: "{% static 'videos/intermediate vid.mp4' %}",
+                title: "Intermediate Kolam Techniques",
+                description: "Explore more complex patterns and advanced drawing techniques.",
+                duration: 28
+            },
+            advanced: {
+                src: "{% static 'videos/advanced.mp4' %}",
+                title: "Advanced Kolam Mastery",
+                description: "Master intricate designs and professional-level Kolam creation.",
+                duration: 36
+            },
+            master: {
+                src: "{% static 'videos/master vid.mp4' %}",
+                title: "Master Level Kolam Artistry",
+                description: "Achieve mastery in the most complex and beautiful Kolam patterns.",
+                duration: 25
+            }
+        };
+
+        // Get video element
+        const lessonVideo = document.getElementById('lessonVideo');
+        const currentLessonTitle = document.getElementById('currentLessonTitle');
+        const currentLessonDescription = document.getElementById('currentLessonDescription');
+
+        // Set default lesson (Basic Level)
+        lessonVideo.src = videoConfig.basic.src;
+        lessonVideo.load();
+
+        document.querySelector('.level[data-level="basic"]').classList.add('active');
+
+        currentLessonTitle.textContent = "▶ " + videoConfig.basic.title;
+        currentLessonDescription.textContent = videoConfig.basic.description;
+
+
+        // Canvas setup
+        const canvas = document.getElementById('kolamCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Drawing state
+        let isDrawing = false;
+        let currentColor = '#000000';
+        let currentBrushSize = 3;
+        let showGrid = false;
+
+        // Set canvas size to match its display size
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+
+            // Save current content before resizing
+            const savedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            // Restore drawing
+            ctx.putImageData(savedImage, 0, 0);
+
+            if (showGrid) drawGrid();
+        }
+
+        // Initialize canvas
+        window.addEventListener('load', resizeCanvas);
+        window.addEventListener('resize', resizeCanvas);
+
+        // Drawing functions
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.lineWidth = currentBrushSize;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = currentColor;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                ctx.beginPath();
+            }
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch events for mobile
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const mouseEvent = new MouseEvent('mouseup', {});
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        // Color selection
+        const colorOptions = document.querySelectorAll('.color-option');
+        const colorPicker = document.getElementById('colorPicker');
+
+        colorOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                console.log('Color option clicked:', option.dataset.color);
+                // Remove active class from all options
+                colorOptions.forEach(opt => opt.classList.remove('active'));
+                // Add active class to clicked option
+                option.classList.add('active');
+                // Set current color
+                currentColor = option.dataset.color;
+                colorPicker.value = currentColor;
+                console.log('Current color set to:', currentColor);
+            });
+        });
+
+        colorPicker.addEventListener('change', (e) => {
+            currentColor = e.target.value;
+            // Remove active class from all preset colors
+            colorOptions.forEach(opt => opt.classList.remove('active'));
+        });
+
+        // Brush size
+        const brushSizeSlider = document.getElementById('brushSize');
+        const brushSizeValue = document.getElementById('brushSizeValue');
+
+        brushSizeSlider.addEventListener('input', (e) => {
+            currentBrushSize = e.target.value;
+            brushSizeValue.textContent = currentBrushSize + "px";
+        });
+
+        // Grid toggle
+        const toggleGridBtn = document.getElementById('toggleGrid');
+
+        function drawGrid() {
+            const gridSize = 20;
+            ctx.save();
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+
+            // Vertical lines
+            for (let x = 0; x <= canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            for (let y = 0; y <= canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        toggleGridBtn.addEventListener('click', () => {
+            showGrid = !showGrid;
+
+            if (showGrid) {
+                drawGrid();
+                toggleGridBtn.textContent = 'Hide Guide';
+            } else {
+                // Clear and redraw without grid
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.putImageData(imageData, 0, 0);
+                toggleGridBtn.textContent = 'Show Guide';
+            }
+        });
+
+        // Clear canvas
+        document.getElementById('clearCanvas').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (showGrid) {
+                drawGrid();
+            }
+        });
+
+        // Lesson selection
+        const lessonItems = document.querySelectorAll('.lesson-item');
+        let completedLessons = new Set(); // stores completed lesson IDs in memory
+
+        lessonItems.forEach(item => {
+            item.addEventListener('click', async () => {
+
+                // Highlight active lesson visually
+                lessonItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                const lessonId = item.getAttribute('data-lesson-id');
+
+                // Mark lesson as completed
+                completedLessons.add(lessonId);
+                item.classList.add('completed');
+
+                // Calculate progress - REMOVED to avoid conflict with video progress
+                /*
+                const totalLessons = lessonItems.length;
+                const doneCount = completedLessons.size;
+                const progressPercent = Math.round((doneCount / totalLessons) * 100);
+
+                // Update UI
+                document.getElementById("progress-text").textContent = `Level Progress: ${progressPercent}% Complete`;
+                document.getElementById("progress-bar").style.width = progressPercent + "%";
+                */
+
+                // ✅ Save progress to Firestore (only lesson completion state, not percentage)
+                if (USER_ID) {
+                    await setDoc(doc(db, "course_progress", USER_ID), {
+                        completedLessons: Array.from(completedLessons)
+                        // progressPercent: progressPercent // Don't save this here
+                    }, { merge: true });
+                }
+            });
+        });
+
+
+
+    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvp2E8q221qU6qgTKBVD-ak68OOQ1yyTs",
+            authDomain: "kolam-b82f4.firebaseapp.com",
+            projectId: "kolam-b82f4",
+            storageBucket: "kolam-b82f4.appspot.com",
+            messagingSenderId: "869946246676",
+            appId: "1:869946246676:web:de9f147841a94526a3c901"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let USER_ID = null;
+
+        function autoSaveCanvas() {
+            if (!USER_ID) return;
+
+            const imageData = canvas.toDataURL("image/png");
+
+            setDoc(doc(db, "kolam_current_work", USER_ID), {
+                imageData: imageData,
+                updatedAt: Date.now()
+            });
+        }
+
+        let autoSaveStarted = false;
+
+        canvas.addEventListener("mousemove", () => {
+            if (!USER_ID) return;
+
+            if (!autoSaveStarted) {
+                autoSaveStarted = true;
+                setInterval(autoSaveCanvas, 2000); // saves every 2 seconds
+            }
+        });
+
+
+
+        // ✅ Level selection handler - moved here to access Firebase variables
+        const levels = document.querySelectorAll('.level');
+        levels.forEach(level => {
+            level.addEventListener('click', async () => {
+                levels.forEach(l => l.classList.remove('active'));
+                level.classList.add('active');
+
+                const selected = level.getAttribute('data-level');
+                lessonVideo.src = videoConfig[selected].src;
+                lessonVideo.load();
+
+                currentLessonTitle.textContent = "▶ " + videoConfig[selected].title;
+                currentLessonDescription.textContent = videoConfig[selected].description;
+
+                // Restore saved video time for this level
+                if (USER_ID) {
+                    const videoProgressRef = doc(db, "course_progress", USER_ID);
+                    const progressSnap = await getDoc(videoProgressRef);
+
+                    if (progressSnap.exists()) {
+                        const data = progressSnap.data();
+                        const levelProgress = data.videoProgress?.[selected];
+
+                        if (levelProgress?.currentTime) {
+                            lessonVideo.addEventListener("loadedmetadata", () => {
+                                console.log(`Resuming ${selected} video at ${levelProgress.currentTime} seconds`);
+                                lessonVideo.currentTime = levelProgress.currentTime;
+                            }, { once: true });
+                        }
+                    }
+                }
+            });
+        });
+
+
+        function downloadCanvasImage(filename) {
+            const link = document.createElement("a");
+            link.href = canvas.toDataURL("image/png"); // image data from canvas
+            link.download = filename + ".png";         // set download filename
+            link.click();
+        }
+
+
+        function generateRandomId(length = 20) {
+            const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            let id = "";
+            for (let i = 0; i < length; i++) {
+                id += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return id;
+        }
+
+
+        // Save design
+        document.getElementById('saveDesign').addEventListener('click', async () => {
+            if (!USER_ID) {
+                alert("⚠ Please log in to save your design.");
+                return;
+            }
+
+            const fileName = generateRandomId();
+            const imageData = canvas.toDataURL("image/png");
+
+            downloadCanvasImage(fileName);
+
+            const formData = new FormData();
+            formData.append("file", imageData);
+            formData.append("upload_preset", "kolam_uploads");
+            formData.append("public_id", fileName); // ✅ Random name assigned
+
+            const cloudName = "dslctk17b";
+
+            const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await uploadResponse.json();
+
+            if (!result.secure_url) {
+                alert("❌ Upload failed. Check Cloudinary preset.");
+                console.log(result);
+                return;
+            }
+
+            await addDoc(collection(db, "kolam_designs"), {
+                userId: USER_ID,
+                imageUrl: result.secure_url,
+                createdAt: new Date()
+            });
+
+            alert("🎉 Design Saved Successfully!");
+        });
+
+        // Initialize levels and progress tracking
+        const levelKeys = ['basic', 'intermediate', 'advanced', 'master'];
+
+        function calculateTotalProgress(videoProgressData) {
+            let totalPercent = 0;
+            levelKeys.forEach(level => {
+                const levelData = videoProgressData[level];
+                if (levelData && levelData.progressPercent) {
+                    totalPercent += levelData.progressPercent;
+                }
+            });
+            return Math.round(totalPercent / levelKeys.length);
+        }
+
+        let saveTimer = null;
+
+        lessonVideo.addEventListener("timeupdate", async () => {
+            if (!USER_ID || !lessonVideo.duration) return;
+
+            const activeLevel = document.querySelector(".level.active").getAttribute("data-level");
+            const currentTime = lessonVideo.currentTime;
+            const duration = lessonVideo.duration;
+
+            // Calculate percentage for current video
+            const progressPercent = Math.min(100, Math.round((currentTime / duration) * 100));
+
+            // Debounce saves
+            if (saveTimer) clearTimeout(saveTimer);
+
+            saveTimer = setTimeout(async () => {
+                // 1. Get current stored data first to preserve other levels
+                const docRef = doc(db, "course_progress", USER_ID);
+                const docSnap = await getDoc(docRef);
+                let currentData = docSnap.exists() ? docSnap.data() : { videoProgress: {} };
+                let videoProgress = currentData.videoProgress || {};
+
+                // 2. Update current level
+                const previousProgress = videoProgress[activeLevel]?.progressPercent || 0;
+                const newProgressPercent = Math.max(previousProgress, progressPercent);
+
+                videoProgress[activeLevel] = {
+                    currentTime: currentTime,
+                    duration: duration,
+                    progressPercent: newProgressPercent,
+                    lastUpdated: Date.now()
+                };
+
+                // 3. Calculate total course progress
+                const totalCourseProgress = calculateTotalProgress(videoProgress);
+
+                // 4. Update UI
+                const progressText = document.getElementById("progress-text");
+                const progressBar = document.getElementById("progress-bar");
+                if (progressText && progressBar) {
+                    progressText.textContent = `Course Progress: ${totalCourseProgress}% Complete`;
+                    progressBar.style.width = totalCourseProgress + "%";
+                }
+
+                // 5. Save to Firestore
+                await setDoc(docRef, {
+                    currentLevel: activeLevel, // Remember last played level
+                    videoProgress: videoProgress,
+                    totalProgress: totalCourseProgress
+                }, { merge: true });
+
+                console.log(`Saved ${activeLevel}: ${newProgressPercent}%, Total: ${totalCourseProgress}%`);
+            }, 1000);
+        });
+
+        // Enhanced restore logic
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return;
+            USER_ID = user.uid;
+
+            // 1. Restore Canvas Work
+            const workRef = doc(db, "kolam_current_work", USER_ID);
+            const workSnap = await getDoc(workRef);
+
+            if (workSnap.exists()) {
+                const savedImage = new Image();
+                savedImage.src = workSnap.data().imageData;
+
+                savedImage.onload = () => {
+                    requestAnimationFrame(() => {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(savedImage, 0, 0, canvas.width, canvas.height);
+                        if (showGrid) drawGrid();
+                    });
+                };
+            }
+
+            // 2. Load saved progress
+            const docRef = doc(db, "course_progress", USER_ID);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                console.log("📊 Progress loaded:", data);
+
+                // 1. Restore Total Progress UI
+                if (data.totalProgress !== undefined) {
+                    const progressText = document.getElementById("progress-text");
+                    const progressBar = document.getElementById("progress-bar");
+                    if (progressText && progressBar) {
+                        progressText.textContent = `Course Progress: ${data.totalProgress}% Complete`;
+                        progressBar.style.width = data.totalProgress + "%";
+                    }
+                }
+
+                // 2. Restore Last Active Level
+                const lastLevel = data.currentLevel || 'basic';
+
+                // Update UI active state
+                document.querySelectorAll('.level').forEach(l => l.classList.remove('active'));
+                const activeLevelBtn = document.querySelector(`.level[data-level="${lastLevel}"]`);
+                if (activeLevelBtn) activeLevelBtn.classList.add('active');
+
+                // Load Video Source
+                if (videoConfig[lastLevel]) {
+                    lessonVideo.src = videoConfig[lastLevel].src;
+
+                    // Update Text
+                    currentLessonTitle.textContent = "▶ " + videoConfig[lastLevel].title;
+                    currentLessonDescription.textContent = videoConfig[lastLevel].description;
+
+                    // 3. Resume Video Time
+                    const levelData = data.videoProgress?.[lastLevel];
+                    if (levelData?.currentTime) {
+                        lessonVideo.currentTime = levelData.currentTime;
+                        console.log(`Resuming ${lastLevel} at ${levelData.currentTime}s`);
+                    }
+                }
+            }
+        });
+
+    </script>
+</body>
+
+</html>
