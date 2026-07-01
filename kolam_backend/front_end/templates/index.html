@@ -604,6 +604,11 @@
     </style>
 </head>
 
+<!-- Floating Om Button -->
+<div id="chatLauncher" onclick="openChatbox()">
+    🕉
+</div>
+
 <body>
     <div class="container">
         <header
@@ -2711,6 +2716,29 @@
             justify-content: center;
             gap: 6px;
         }
+
+        #chatLauncher {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            background: #8B4513;
+            color: white;
+            border-radius: 50%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            transition: transform 0.2s;
+        }
+
+        #chatLauncher:hover {
+            transform: scale(1.1);
+        }
     </style>
     <script>
         // Kolam AI Generator JavaScript - Fixed Version
@@ -2718,18 +2746,21 @@
         let messageHistory = [];
         let kolamCounter = 1;
 
-        function toggleChatbox() {
-            const chatbox = document.getElementById('kolamChatbox');
-            isMinimized = !isMinimized;
-            chatbox.classList.toggle('minimized', isMinimized);
+        function toggleMinimize() {
+            document.getElementById("kolamChatbox").style.display = "none";
+            document.getElementById("chatLauncher").style.display = "flex";
         }
 
         function closeChatbox(event) {
             event.stopPropagation();
-            const chatbox = document.getElementById('kolamChatbox');
-            chatbox.style.display = 'none';
-        }
 
+            document.getElementById("kolamChatbox").style.display = "none";
+            document.getElementById("chatLauncher").style.display = "flex";
+        }
+        function openChatbox() {
+            document.getElementById("kolamChatbox").style.display = "block";
+            document.getElementById("chatLauncher").style.display = "none";
+        }
         function usePrompt(prompt) {
             const messageInput = document.getElementById('messageInput');
             messageInput.value = prompt;
@@ -3253,7 +3284,7 @@
                             const textElement = document.getElementById(`${storyId}-${lang}`);
                             if (textElement) {
                                 const text = textElement.innerText;
-                                
+
                                 // Re-fetch voices just in case they loaded late
                                 if (voices.length === 0) {
                                     voices = window.speechSynthesis.getVoices();
@@ -3264,13 +3295,13 @@
                                 if (voices.length > 0) {
                                     // Debug: Log voices to console to help troubleshoot
                                     console.log("Searching for Hindi voice among:", voices.length, "voices");
-                                    
+
                                     // Prioritize: 1. Google voices, 2. Local Natural voices, 3. Any Local voice, 4. Online voices as last resort
                                     selectedVoice = voices.find(v => v.lang.toLowerCase().startsWith('hi') && v.name.includes('Google')) ||
-                                                     voices.find(v => v.lang.toLowerCase().startsWith('hi') && !v.name.includes('Online') && (v.name.includes('Natural') || v.name.includes('Premium'))) ||
-                                                     voices.find(v => v.lang.toLowerCase().startsWith('hi') && !v.name.includes('Online')) ||
-                                                     voices.find(v => v.lang.toLowerCase().startsWith('hi'));
-                                    
+                                        voices.find(v => v.lang.toLowerCase().startsWith('hi') && !v.name.includes('Online') && (v.name.includes('Natural') || v.name.includes('Premium'))) ||
+                                        voices.find(v => v.lang.toLowerCase().startsWith('hi') && !v.name.includes('Online')) ||
+                                        voices.find(v => v.lang.toLowerCase().startsWith('hi'));
+
                                     if (selectedVoice) {
                                         console.log("Selected voice:", selectedVoice.name, selectedVoice.lang);
                                     }
@@ -3334,7 +3365,7 @@
                                 btn.classList.add('playing');
                                 const pauseText = btn.dataset.pauseText || (btn.dataset.lang === 'hi' ? '⏸ रोकें' : '⏸ Pause');
                                 btn.innerText = pauseText;
-                                
+
                                 playNextSentence();
                             }
                         }, 250);

@@ -413,6 +413,7 @@
         let currentColor = '#000000';
         let currentBrushSize = 3;
         let showGrid = false;
+        let drawingImage = null;
 
         // Set canvas size to match its display size
         function resizeCanvas() {
@@ -437,7 +438,13 @@
         // Drawing functions
         function startDrawing(e) {
             isDrawing = true;
-            draw(e);
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
         }
 
         function draw(e) {
@@ -453,17 +460,16 @@
 
             ctx.lineTo(x, y);
             ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
         }
 
         function stopDrawing() {
-            if (isDrawing) {
-                isDrawing = false;
-                ctx.beginPath();
-            }
-        }
+            if (!isDrawing) return;
 
+            isDrawing = false;
+            ctx.closePath();
+
+            drawingImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
         // Mouse events
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
@@ -558,24 +564,29 @@
             ctx.restore();
         }
 
-        toggleGridBtn.addEventListener('click', () => {
+        toggleGridBtn.addEventListener("click", () => {
             showGrid = !showGrid;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (drawingImage) {
+                ctx.putImageData(drawingImage, 0, 0);
+            }
 
             if (showGrid) {
                 drawGrid();
-                toggleGridBtn.textContent = 'Hide Guide';
+                toggleGridBtn.textContent = "Hide Guide";
             } else {
-                // Clear and redraw without grid
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.putImageData(imageData, 0, 0);
-                toggleGridBtn.textContent = 'Show Guide';
+                toggleGridBtn.textContent = "Show Guide";
             }
         });
 
         // Clear canvas
         document.getElementById('clearCanvas').addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawingImage = null;
+
             if (showGrid) {
                 drawGrid();
             }

@@ -29,10 +29,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 cred_path = os.path.join(BASE_DIR, "firebase-key.json")
-cred = credentials.Certificate(cred_path)
-firebase_admin.initialize_app(cred)
 
-
+if os.path.exists(cred_path):
+    cred = credentials.Certificate(cred_path)
+    if not firebase_admin._apps:
+        firebase_admin.initialize_app(cred)
 # --------------------------
 # Base directory
 # --------------------------
